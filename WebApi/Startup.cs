@@ -14,9 +14,12 @@ namespace WebApi
         }
 
         public IConfiguration Configuration { get; }
+         readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 
         public void ConfigureServices(IServiceCollection services)
         {
+
             services.AddControllers();
             services.AddEndpointsApiExplorer();
 
@@ -26,7 +29,17 @@ namespace WebApi
             
             services.AddSwaggerGen();
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                  policy =>
+                                  {
+                                      policy.WithOrigins("http://localhost:3000").AllowAnyHeader()
+                                                              .AllowAnyMethod(); ;
+                                  });
+            });
         }
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -41,6 +54,8 @@ namespace WebApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseAuthorization();
 

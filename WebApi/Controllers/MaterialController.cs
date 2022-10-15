@@ -40,6 +40,7 @@ namespace WebApi.Controllers
         /// <returns></returns>
         /// 
         [HttpGet]
+
         [Route("get-all")]
         public async Task<ActionResult<PagingResultDto<MaterialDto>>> GatAllAsync()
         {

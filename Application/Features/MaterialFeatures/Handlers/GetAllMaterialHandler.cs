@@ -1,6 +1,7 @@
 ﻿using Application.Common.Dtos;
 using Application.Features.MaterialFeatures.Dtos;
 using Application.Features.MaterialFeatures.Queries;
+using Domain.Material;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -17,9 +18,10 @@ namespace Application.Features.MaterialFeatures.Handlers
         {
             _MaterialService = MaterialService;
         }
+        string[] include = { nameof(Category), nameof(UnitMaterial) };
         public async Task<PagingResultDto<MaterialDto>> Handle(GetAllMaterialQuery request, CancellationToken cancellationToken)
         {
-            return await _MaterialService.GetPagingAsync(null);
+            return await _MaterialService.GetPagingAsync(null, include);
         }
     }
 }
