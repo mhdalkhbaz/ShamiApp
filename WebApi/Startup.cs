@@ -1,4 +1,4 @@
-﻿using Application;
+﻿    using Application;
 using Application.Interfaces;
 using Microsoft.OpenApi.Models;
 using Persistence;
@@ -14,6 +14,7 @@ namespace WebApi
         }
 
         public IConfiguration Configuration { get; }
+        //readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -26,7 +27,32 @@ namespace WebApi
             
             services.AddSwaggerGen();
 
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy(name: MyAllowSpecificOrigins,
+            //                      policy =>
+            //                      {
+            //                          policy.WithOrigins("http://localhost:44323").AllowAnyHeader()
+            //                                                  .AllowAnyMethod(); ;
+            //                      });
+            //});
+
+
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowOrigin",
+                    builder =>
+                    {
+                        builder.WithOrigins(Configuration["App:CorsOrigins"].Split(',').ToArray())
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
+
         }
+
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -41,6 +67,9 @@ namespace WebApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            //app.UseCors(MyAllowSpecificOrigins);
+            app.UseCors("AllowOrigin");
 
             app.UseAuthorization();
 
