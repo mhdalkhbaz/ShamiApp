@@ -1,0 +1,51 @@
+﻿@page "/fetchMaterialdetails"
+@inject HttpClient Http
+
+<h1>Material Data</h1>
+<p>Blazor CRUD operation</p> 
+<br />
+@if (MaterialList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped align-middle table-bordered">
+        <thead class="table-success">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Department</th>
+                <th>Cell No</th>
+                <th>E-mail</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Material in MaterialList)
+            {
+                <tr>
+                    <td>@Material.Id</td>
+                   
+                   
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+@code {
+    protected List<Material> MaterialList = new();
+    protected List<Material> searchMaterialData = new();
+    protected Material Material = new();
+    protected string SearchString { get; set; } = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        await GetMaterial();
+    }
+    protected async Task GetMaterial()
+    {
+        //MaterialList = await Http.GetFromJsonAsync<List<Material>>("/api/Material/get-all");
+        searchMaterialData = MaterialList;
+    } 
+}

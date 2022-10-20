@@ -1,12 +1,23 @@
-﻿<h3>Orders</h3>
+﻿@page "/orders"
+@*@using SharedProject.Dtos
+@using SharedProject.Dtos.Common*@
+@inject HttpClient Http
 
-    
+<h3>Orders</h3>
+
+<RadzenButton Text="Hi Radzen"></RadzenButton>
 
 @code {
+    IEnumerable<Material> materials;
+
+    [Inject]
+    public IMaterialService _materialService { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-    
+        //materials = await _materialService.GetAllMaterials();
+        //var userList = await Http.GetFromJsonAsync<Material>("api/Material/get-all");
+        string t; 
     }
 
 }
