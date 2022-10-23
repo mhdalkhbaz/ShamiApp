@@ -23,6 +23,25 @@ namespace Application.Features.CategoryFeatures
             _mapper = mapper;
         }
 
+        public async Task DeleteAsync(int id)
+        {
+            var categoryDto = await GetByIdAsync(id);
+            var category = _mapper.Map<Category>(categoryDto);
+            category.IsDeleted = true;
+            category.Name = "ssssssssssss";
+            category.CreatedBy = "ssssssssssss";
+            _repository.Update(category);
+        }
+        public async Task UpdatsseAsync(int id)
+        {
+            var categoryDto = await GetByIdAsync(id);
+            var category = _mapper.Map<Category>(categoryDto);
+            category.IsDeleted = true;
+            category.Name = "ssssssssssss";
+            category.CreatedBy = "ssssssssssss";
+        }
+
+
         //public async Task<PagingResultDto<CategoryDto>> GetAll()
         //{
         //    var categories = _repository.GetAll();

@@ -108,23 +108,15 @@ namespace Persistence.Repositories
 
 
         #region  Private Methods
-        private void DeleteSoft(TEntity entity)
+        public void SoftDelete(TEntity entity)
         {
             entity.IsDeleted = true;
             entity.DeletedOn = DateTime.UtcNow;
             // TODO: Set DeletedBy
             _context.Update(entity);
+            _context.SaveChanges();
         }
-        private void DeleteSoft(IEnumerable<TEntity> entities)
-        {
-            foreach (var entity in entities)
-            {
-                entity.IsDeleted = true;
-                entity.DeletedOn = DateTime.UtcNow;
-                // TODO: Set DeletedBy
-            }
-            _context.UpdateRange(entities);
-        }
+
         private static IQueryable<TEntity> Include(IQueryable<TEntity> query, params Expression<Func<TEntity, object>>[] propertySelectors)
         {
             if (propertySelectors != null)
@@ -191,6 +183,8 @@ namespace Persistence.Repositories
                 query = query.Where(filter);
             return await query.Select(selector).ToListAsync();
         }
+
+    
 
 
 

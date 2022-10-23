@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Application.Features.CategoryFeatures.Dtos
 {
-    public class UpdateCategoryDto : IEntity<int>
+    public class UpdateCategoryDto : EntityDto<int>
     {
-        public int Id {get;set;}
         public string Name {get;set;}
     }
 }

@@ -19,6 +19,7 @@ namespace Application.Interfaces
         Task AddRangeAsync(IEnumerable<TEntity> entities);
         void Update(TEntity entity);
         void UpdateRange(IEnumerable<TEntity> entities);
+        void SoftDelete(TEntity entity);
         //void Remove(TEntity entity);
         //void RemoveRange(IEnumerable<TEntity> entities);
         Task SaveChangesAsync();

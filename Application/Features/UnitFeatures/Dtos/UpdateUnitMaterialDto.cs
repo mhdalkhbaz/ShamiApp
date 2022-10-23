@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Application.Features.UnitMaterialFeatures.Dtos
 {
-    public class UpdateUnitMaterialDto : IEntity<int>
+    public class UpdateUnitMaterialDto : EntityDto<int>
     {
-        public int Id { get; set; }
         public string Name { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace Application.Services
     public class CRUDService<TEntity, TCreateEntity, TUpdateEntity, TEntityDto, TLiteEntityDto, TKey>
         : Service<TEntity, TEntityDto, TLiteEntityDto, TKey>, ICRUDService<TEntity, TCreateEntity, TUpdateEntity, TEntityDto, TLiteEntityDto, TKey>
         where TEntity : class, IAuditableEntity<TKey>
-        where TUpdateEntity : IEntity<TKey>
+        where TUpdateEntity : IEntityDto<TKey>
     {
         protected readonly IRepository<TEntity, TKey> Repository;
         protected readonly IMapper Mapper;
@@ -54,9 +54,19 @@ namespace Application.Services
             }
         }
 
+        public async Task<TEntityDto> UpdateTestAsync(TUpdateEntity updateEntity)
+        {
+            var entity = await Repository.GetByIdAsync(updateEntity.Id);
+            entity = Mapper.Map<TUpdateEntity, TEntity>(updateEntity, entity);
 
-
-
-
+            Repository.Update(entity);
+                ///we need for it in update 
+                ///example if we update a list of object inside an aggregate root object 
+                ///like add a new region for a city
+                ///then we need for the genarated id of the new entity (region)
+                await Repository.SaveChangesAsync();
+                var entityDto = Mapper.Map<TEntityDto>(entity);
+                return entityDto;
+            }
+        }
     }
-}

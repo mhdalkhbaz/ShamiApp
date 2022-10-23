@@ -65,11 +65,22 @@ namespace WebApi.Controllers
         /// 
         [HttpGet]
         [Route("get-By-Id")]
-        public async Task<ActionResult<PagingResultDto<CategoryDto>>> GetByIdAsync([FromQuery] int id)
+        public async Task<ActionResult<CategoryDto>> GetByIdAsync(int id)
         {
             return Ok(await Mediator.Send(new GetCategoryByIdQuery(id)));
         }
 
+
+        /// <summary>
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// 
+        [HttpPut("delete-id")]
+        public async Task<ActionResult> DeleteAsync([FromBody] int id)
+        {
+            return Ok(await Mediator.Send(new DeleteCategoryCommand(id)));
+        }
 
     }
 }

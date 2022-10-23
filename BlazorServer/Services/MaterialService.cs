@@ -1,4 +1,8 @@
 ﻿using Domain.Material;
+using Microsoft.AspNetCore.WebUtilities;
+using SharedProject.Dtos;
+using SharedProject.Dtos.Common;
+using static System.Net.WebRequestMethods;
 
 namespace BlazorServer.Services
 {
@@ -19,12 +23,13 @@ namespace BlazorServer.Services
         }
 
 
-        public async Task<IEnumerable<Material>> GetAllMaterials()
+        public async Task<IEnumerable<MaterialDto>> GetAllMaterials()
         {
-            IEnumerable<Material> materials;
+            IEnumerable<MaterialDto> materials;
             try
             {
-                materials = await _httpClient.GetFromJsonAsync<IEnumerable<Material>>("api/Material");
+               var materialList = await _httpClient.GetFromJsonAsync<PagingResultDto<MaterialDto>>("api/Material/get-all");
+                materials = materialList.Data;
             }
             catch (Exception exception)
             {

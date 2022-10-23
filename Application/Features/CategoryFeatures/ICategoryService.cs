@@ -10,6 +10,11 @@ namespace Application.Features.CategoryFeatures
         //Task<PagingResultDto<CategoryDto>> GetAll();
         //Task<CategoryDto> GetById(int id);
 
+        Task DeleteAsync(int id);
+        Task UpdatsseAsync(int id);
+        //Task SoftDelete(int id);
+
+
 
     }
 }

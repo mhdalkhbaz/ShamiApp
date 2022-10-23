@@ -1,0 +1,40 @@
+﻿@page "/materials"
+@using BlazorServer.Services
+@using Domain.Material
+@using SharedProject.Dtos
+@using SharedProject.Dtos.Common
+
+
+<RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4">
+   Orders
+</RadzenText>
+    @*<RadzenButton Click=@AddMaterial()  Text="Add New" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />*@
+
+    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                Data="@materials" TItem="MaterialDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="MaterialDto" Property="Id" Filterable="false" Title="Id" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="MaterialDto" Property="Name" Filterable="false" Title="name" Frozen="true" Width="200px" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="MaterialDto" Property="Category.Name" Filterable="false" Title="Category Name" Frozen="true" Width="200px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="MaterialDto" Property="UnitMaterial.Name" Filterable="false" Title="Unit Material" Frozen="true" Width="200px" TextAlign="TextAlign.Center" />
+
+        </Columns>
+    </RadzenDataGrid>
+ 
+@code {
+    IEnumerable<MaterialDto> materials;
+
+    [Inject]
+    public IMaterialService _materialService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        materials = await _materialService.GetAllMaterials();
+    }
+
+    private void AddMaterial()
+    {
+
+    }
+
+}
