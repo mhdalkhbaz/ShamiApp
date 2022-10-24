@@ -40,14 +40,11 @@ namespace Application.Features.MaterialFeatures
         public override async Task<MaterialDto> CreateAsync(CreateMaterialDto createEntity)
         {
             var entity = _mapper.Map<Material>(createEntity);
-            var category = await _CategoryRepository.GetByIdAsync(entity.CategoryId);
-            var unitMaterial = await _UnitMaterialRepository.GetByIdAsync(entity.UnitMaterialId);
-            entity.Category = category;
-            entity.UnitMaterial = unitMaterial;
-
+          
             await _repository.AddAsync(entity);
             await _repository.SaveChangesAsync();
-            var entityDto = Mapper.Map<MaterialDto>(entity);
+
+            var entityDto = new MaterialDto();
             return entityDto;
 
         }

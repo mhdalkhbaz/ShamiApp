@@ -1,40 +1,172 @@
 ﻿@page "/materials"
-@using BlazorServer.Services
-@using Domain.Material
-@using SharedProject.Dtos
-@using SharedProject.Dtos.Common
+@using AutoMapper
+
+@inject IMapper _mapper;
+
+<RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4"> Categories </RadzenText>
+
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Class="mt-2 mb-4" Text="Add New Material" Click="@InsertRow" Disabled=@(MaterialDtoToInsert != null || MaterialDtoToUpdate != null) />
+
+<RadzenDataGrid @ref="MaterialDtosGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single"
+                Data="@materialDtos" TItem="MaterialDto" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow">
+
+    <Columns>
+        <RadzenDataGridColumn TItem="MaterialDto" Property="Id" Title="ID" Width="20%" />
+
+        <RadzenDataGridColumn TItem="MaterialDto" Property="Name" Title="Name" Width="30%">
+            <EditTemplate Context="materialDto">
+                <RadzenTextBox @bind-Value="materialDto.Name" Style="width:100%; display: block" Name="MaterialName" />
+                <RadzenRequiredValidator Text="Material Name Is Required" Component="MaterialName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+           
+        <RadzenDataGridColumn TItem="MaterialDto" Property="Category.Name" Title="Category Name" Width="280px">
 
 
-<RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4">
-   Orders
-</RadzenText>
-    @*<RadzenButton Click=@AddMaterial()  Text="Add New" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Primary" />*@
+            <EditTemplate Context="materialDto">
+            
+                <RadzenDropDown @bind-Value="materialDto.Category.Id" Data="@categories" TextProperty="Name" ValueProperty="Id" Style="width:100%; display: block;" />
+          
+            </EditTemplate>
 
-    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                Data="@materials" TItem="MaterialDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
-        <Columns>
-            <RadzenDataGridColumn TItem="MaterialDto" Property="Id" Filterable="false" Title="Id" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-            <RadzenDataGridColumn TItem="MaterialDto" Property="Name" Filterable="false" Title="name" Frozen="true" Width="200px" TextAlign="TextAlign.Center" />
-            <RadzenDataGridColumn TItem="MaterialDto" Property="Category.Name" Filterable="false" Title="Category Name" Frozen="true" Width="200px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn TItem="MaterialDto" Property="UnitMaterial.Name" Filterable="false" Title="Unit Material" Frozen="true" Width="200px" TextAlign="TextAlign.Center" />
+        </RadzenDataGridColumn>
+   
+   
 
-        </Columns>
-    </RadzenDataGrid>
- 
-@code {
-    IEnumerable<MaterialDto> materials;
+
+
+        <RadzenDataGridColumn TItem="MaterialDto" Context="materialDtos" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <Template Context="materialDto">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(materialDto))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@(args => DeleteRow(materialDto))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+
+            <EditTemplate Context="materialDto">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(materialDto))">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@((args) => CancelEdit(materialDto))">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@(args => DeleteRow(materialDto))">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code
+{
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    [Inject]
+    public IServiceGeneric<MaterialDto, Material, CreateMaterialDto> _materialsservice { get; set; }
 
     [Inject]
-    public IServiceGeneric<MaterialDto, Material> _materialService { get; set; }
+    public IServiceGeneric<CategoryDto, Category, CreateCategoryDto> _categoreiesservice { get; set; }
+
+    [Inject]
+    public IServiceGeneric<UnitMaterialDto, UnitMaterial, CreateUnitMaterialDto> _unitMaterialsservice { get; set; }
+
+
+    RadzenDataGrid<MaterialDto> MaterialDtosGrid;
+    IEnumerable<MaterialDto> materialDtos;
+
+    MaterialDto MaterialDtoToInsert;
+    MaterialDto MaterialDtoToUpdate;
+
+    IEnumerable<CategoryDto> categories;
+    IEnumerable<UnitMaterialDto> unitMaterials;
 
     protected override async Task OnInitializedAsync()
     {
-        materials = await _materialService.GetAllAsync();
+        categories = await _categoreiesservice.GetAllAsync();
+        unitMaterials = await _unitMaterialsservice.GetAllAsync();
+
+        materialDtos = await _materialsservice.GetAllAsync();
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Load", Duration = 3000 });
     }
 
-    private void AddMaterial()
+    async Task InsertRow()
     {
+        MaterialDtoToInsert = new MaterialDto();
+        MaterialDtoToInsert.Category = new CategoryDto();
+        MaterialDtoToInsert.UnitMaterial = new UnitMaterialDto();
+        await MaterialDtosGrid.InsertRow(MaterialDtoToInsert);
+    }
+    async Task OnCreateRow(MaterialDto categoryDto)
+    {
+        categoryDto.UnitMaterial.Id = 1;
+        var createMaterialDto = _mapper.Map<CreateMaterialDto>(categoryDto);
+        await _materialsservice.AddAsync(createMaterialDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Material Created", Duration = 3000 });
+        MaterialDtoToInsert = null;
+        materialDtos = await _materialsservice.GetAllAsync();
+    }
+
+    async Task SaveRow(MaterialDto MaterialDto)
+    {
+        await MaterialDtosGrid.UpdateRow(MaterialDto);
 
     }
 
+    void CancelEdit(MaterialDto MaterialDto)
+    {
+        if (MaterialDto == MaterialDtoToInsert)
+        {
+            MaterialDtoToInsert = null;
+        }
+        MaterialDtoToUpdate = null;
+        MaterialDtosGrid.CancelEditRow(MaterialDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Warning, Summary = "Canceled", Duration = 2000 });
+    }
+
+    //UpdateRow
+    async Task EditRow(MaterialDto MaterialDto)
+    {
+        MaterialDtoToUpdate = MaterialDto;
+        await MaterialDtosGrid.EditRow(MaterialDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Material Updated", Duration = 3000 });
+    }
+
+    async void OnUpdateRow(MaterialDto categoryDto)
+    {
+        if (categoryDto == MaterialDtoToInsert)
+        {
+            MaterialDtoToInsert = null;
+        }
+        MaterialDtoToUpdate = null;
+        _materialsservice.UpdateAsync(categoryDto);
+    }
+
+    //DeleteRow
+    async Task DeleteRow(MaterialDto categoryDto)
+    {
+        if (categoryDto == MaterialDtoToInsert)
+        {
+            MaterialDtoToInsert = null;
+        }
+        if (categoryDto == MaterialDtoToUpdate)
+        {
+            MaterialDtoToUpdate = null;
+        }
+        if (materialDtos.Contains(categoryDto))
+        {
+            await _materialsservice.DeleteAsync(categoryDto.Id);
+            materialDtos = await _materialsservice.GetAllAsync();
+            MaterialDtosGrid.Reload();
+            ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Material Deleted", Duration = 3000 });
+        }
+        else
+        {
+            MaterialDtosGrid.CancelEditRow(categoryDto);
+            MaterialDtosGrid.Reload();
+        }
+    }
+
+    async void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+        //Console.WriteLine($"{message.Severity} notification");
+    }
 }

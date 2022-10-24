@@ -42,7 +42,7 @@
 {
 //--------------------------------------------------------------------------------------------------------------------------------------
     [Inject]
-    public IServiceGeneric<CategoryDto, Category> _categorieservice { get; set; }
+    public IServiceGeneric<CategoryDto, Category, CreateCategoryDto> _categorieservice { get; set; }
 
     RadzenDataGrid<CategoryDto> CategoryDtosGrid;
     IEnumerable<CategoryDto> categorieDtos;
@@ -63,7 +63,7 @@
     async Task OnCreateRow(CategoryDto categoryDto)
     {
         categoryDto.Id = 0;
-        _categorieservice.AddAsync(categoryDto);
+        _categorieservice.AddAsync(new CreateCategoryDto() );
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Created", Duration = 3000 });
         CategoryDtoToInsert = null;
     }

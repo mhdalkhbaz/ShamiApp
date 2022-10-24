@@ -6,7 +6,7 @@ using System.Net.Http.Json;
 
 namespace BlazorServer.Services
 {
-    public class ServiceGeneric<TDto, T> : IServiceGeneric<TDto, T>
+    public class ServiceGeneric<TDto, T, TCreateDto> : IServiceGeneric<TDto, T, TCreateDto>
     {
         private readonly HttpClient _httpClient;
 
@@ -14,12 +14,12 @@ namespace BlazorServer.Services
         {
             _httpClient = httpClient;
         }
-        public async Task AddAsync(TDto category)
+        public async Task AddAsync(TCreateDto category)
         {
             var url = String.Format("api/{0}", typeof(T).Name);
             try
             {
-                var httpResponseMessage = await _httpClient.PostAsJsonAsync<TDto>(url, category);
+                var httpResponseMessage = await _httpClient.PostAsJsonAsync<TCreateDto>(url, category);
             }
             catch (Exception exception)
             {

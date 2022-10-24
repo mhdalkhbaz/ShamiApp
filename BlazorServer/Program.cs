@@ -3,6 +3,7 @@ using BlazorServer.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +16,11 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddHttpClient();
 
 
-builder.Services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
+builder.Services.AddScoped(typeof(IServiceGeneric<,,>), typeof(ServiceGeneric<,,>));
 
 builder.Services.AddScoped<NotificationService>();
 
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44323") });
 

@@ -42,7 +42,7 @@
 {
 //--------------------------------------------------------------------------------------------------------------------------------------
     [Inject]
-    public IServiceGeneric<UnitMaterialDto , UnitMaterial> _UnitMaterialservice { get; set; }
+    public IServiceGeneric<UnitMaterialDto, UnitMaterial, CreateUnitMaterialDto> _UnitMaterialservice { get; set; }
 
     RadzenDataGrid<UnitMaterialDto> UnitMaterialDtosGrid;
     IEnumerable<UnitMaterialDto> UnitMaterialDtos;
@@ -63,7 +63,8 @@
     async Task OnCreateRow(UnitMaterialDto UnitMaterialDto)
     {
         UnitMaterialDto.Id = 0;
-        _UnitMaterialservice.AddAsync(UnitMaterialDto);
+        
+        _UnitMaterialservice.AddAsync(new CreateUnitMaterialDto() );
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "UnitMaterial Created", Duration = 3000 });
         UnitMaterialDtoToInsert = null;
     }
