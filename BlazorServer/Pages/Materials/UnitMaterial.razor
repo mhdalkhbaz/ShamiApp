@@ -1,0 +1,135 @@
+﻿@page "/UnitMaterials"
+
+<RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4"> UnitMaterials </RadzenText>
+
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Class="mt-2 mb-4" Text="Add New UnitMaterial" Click="@InsertRow" Disabled=@(UnitMaterialDtoToInsert != null || UnitMaterialDtoToUpdate != null) />
+
+<RadzenDataGrid @ref="UnitMaterialDtosGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single"
+                Data="@UnitMaterialDtos" TItem="UnitMaterialDto" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow">
+
+    <Columns>
+        <RadzenDataGridColumn TItem="UnitMaterialDto" Property="Id" Title="ID" Width="20%" />
+
+        <RadzenDataGridColumn TItem="UnitMaterialDto" Property="Name" Title="Name" Width="30%">
+            <EditTemplate Context="UnitMaterialDto">
+                <RadzenTextBox @bind-Value="UnitMaterialDto.Name" Style="width:100%; display: block" Name="UnitMaterialName" />
+                <RadzenRequiredValidator Text="UnitMaterial Name Is Required" Component="UnitMaterialName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="UnitMaterialDto" Context="UnitMaterialDtos" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <Template Context="UnitMaterialDto">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(UnitMaterialDto))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@(args => DeleteRow(UnitMaterialDto))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+
+            <EditTemplate Context="UnitMaterialDto">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(UnitMaterialDto))">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@((args) => CancelEdit(UnitMaterialDto))">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@(args => DeleteRow(UnitMaterialDto))">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+
+@code
+{
+//--------------------------------------------------------------------------------------------------------------------------------------
+    [Inject]
+    public IServiceGeneric<UnitMaterialDto , UnitMaterial> _UnitMaterialservice { get; set; }
+
+    RadzenDataGrid<UnitMaterialDto> UnitMaterialDtosGrid;
+    IEnumerable<UnitMaterialDto> UnitMaterialDtos;
+    UnitMaterialDto UnitMaterialDtoToInsert;
+    UnitMaterialDto UnitMaterialDtoToUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        UnitMaterialDtos = await _UnitMaterialservice.GetAllAsync();
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Load", Duration = 3000 });
+    }
+
+    async Task InsertRow()
+    {
+        UnitMaterialDtoToInsert = new UnitMaterialDto();
+        await UnitMaterialDtosGrid.InsertRow(UnitMaterialDtoToInsert);
+    }
+    async Task OnCreateRow(UnitMaterialDto UnitMaterialDto)
+    {
+        UnitMaterialDto.Id = 0;
+        _UnitMaterialservice.AddAsync(UnitMaterialDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "UnitMaterial Created", Duration = 3000 });
+        UnitMaterialDtoToInsert = null;
+    }
+
+    async Task SaveRow(UnitMaterialDto UnitMaterialDto)
+    {
+        await UnitMaterialDtosGrid.UpdateRow(UnitMaterialDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "UnitMaterial Updated", Duration = 3000 });
+    }
+
+    void CancelEdit(UnitMaterialDto UnitMaterialDto)
+    {
+        if (UnitMaterialDto == UnitMaterialDtoToInsert)
+        {
+            UnitMaterialDtoToInsert = null;
+        }
+        UnitMaterialDtoToUpdate = null;
+        UnitMaterialDtosGrid.CancelEditRow(UnitMaterialDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Warning, Summary = "Canceled", Duration = 2000 });
+    }
+
+    //UpdateRow
+    async Task EditRow(UnitMaterialDto UnitMaterialDto)
+    {
+        UnitMaterialDtoToUpdate = UnitMaterialDto;
+        await UnitMaterialDtosGrid.EditRow(UnitMaterialDto);
+    }
+
+    async void OnUpdateRow(UnitMaterialDto UnitMaterialDto)
+    {
+        if (UnitMaterialDto == UnitMaterialDtoToInsert)
+        {
+            UnitMaterialDtoToInsert = null;
+        }
+        UnitMaterialDtoToUpdate = null;
+        _UnitMaterialservice.UpdateAsync(UnitMaterialDto);
+    }
+
+    //DeleteRow
+    async Task DeleteRow(UnitMaterialDto UnitMaterialDto)
+    {
+        if (UnitMaterialDto == UnitMaterialDtoToInsert)
+        {
+            UnitMaterialDtoToInsert = null;
+        }
+        if (UnitMaterialDto == UnitMaterialDtoToUpdate)
+        {
+            UnitMaterialDtoToUpdate = null;
+        }
+        if (UnitMaterialDtos.Contains(UnitMaterialDto))
+        {
+            await _UnitMaterialservice.DeleteAsync(UnitMaterialDto.Id);
+            UnitMaterialDtos = await _UnitMaterialservice.GetAllAsync();
+            UnitMaterialDtosGrid.Reload();
+            ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "UnitMaterial Deleted", Duration = 3000 });
+        }
+        else
+        {
+            UnitMaterialDtosGrid.CancelEditRow(UnitMaterialDto);
+            UnitMaterialDtosGrid.Reload();
+        }
+    }
+
+    async void ShowNotification(NotificationMessage message)
+    {
+        notificationService.Notify(message);
+        //Console.WriteLine($"{message.Severity} notification");
+    }
+}

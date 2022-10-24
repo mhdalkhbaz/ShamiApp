@@ -25,11 +25,11 @@
     IEnumerable<MaterialDto> materials;
 
     [Inject]
-    public IMaterialService _materialService { get; set; }
+    public IServiceGeneric<MaterialDto, Material> _materialService { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        materials = await _materialService.GetAllMaterials();
+        materials = await _materialService.GetAllAsync();
     }
 
     private void AddMaterial()

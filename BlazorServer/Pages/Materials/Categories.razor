@@ -1,16 +1,6 @@
-﻿@page "/categories-list"
-@using BlazorServer.Services
-@using Domain.Material
-@using SharedProject.Dtos
+﻿@page "/categories"
 
-
-@inject NotificationService notificationService
-
-
-<RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4">
-   Categories
-</RadzenText>
-
+<RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4"> Categories </RadzenText>
 
 <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Class="mt-2 mb-4" Text="Add New Category" Click="@InsertRow" Disabled=@(CategoryDtoToInsert != null || CategoryDtoToUpdate != null) />
 
@@ -18,11 +8,11 @@
                 Data="@categorieDtos" TItem="CategoryDto" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow">
 
     <Columns>
-        <RadzenDataGridColumn TItem="CategoryDto" Property="Id" Title="Category ID" Width="220px" />
+        <RadzenDataGridColumn TItem="CategoryDto" Property="Id" Title="ID" Width="20%" />
 
-        <RadzenDataGridColumn TItem="CategoryDto" Property="Name" Title="Category Name">
+        <RadzenDataGridColumn TItem="CategoryDto" Property="Name" Title="Name" Width="30%">
             <EditTemplate Context="categorieDto">
-                <RadzenTextBox @bind-Value="categorieDto.Name" Style="width:70%; display: block" Name="CategoryName" />
+                <RadzenTextBox @bind-Value="categorieDto.Name" Style="width:100%; display: block" Name="CategoryName" />
                 <RadzenRequiredValidator Text="Category Name Is Required" Component="CategoryName" Popup="true" />
             </EditTemplate>
         </RadzenDataGridColumn>
@@ -44,56 +34,43 @@
                 </RadzenButton>
             </EditTemplate>
         </RadzenDataGridColumn>
-
-
     </Columns>
 </RadzenDataGrid>
 
 
-
-@code {
-
+@code
+{
+//--------------------------------------------------------------------------------------------------------------------------------------
     [Inject]
-    public ICategoryService _categorieservice { get; set; }
+    public IServiceGeneric<CategoryDto, Category> _categorieservice { get; set; }
 
     RadzenDataGrid<CategoryDto> CategoryDtosGrid;
     IEnumerable<CategoryDto> categorieDtos;
+    CategoryDto CategoryDtoToInsert;
+    CategoryDto CategoryDtoToUpdate;
 
     protected override async Task OnInitializedAsync()
     {
-        categorieDtos = await _categorieservice.GetAllCategories();
-        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Load", Duration = 4000 });
-
-
+        categorieDtos = await _categorieservice.GetAllAsync();
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Load", Duration = 3000 });
     }
-
-
-    CategoryDto CategoryDtoToInsert;
-    CategoryDto CategoryDtoToUpdate;
 
     async Task InsertRow()
     {
         CategoryDtoToInsert = new CategoryDto();
         await CategoryDtosGrid.InsertRow(CategoryDtoToInsert);
     }
-
     async Task OnCreateRow(CategoryDto categoryDto)
     {
         categoryDto.Id = 0;
-
-        _categorieservice.AddCategoryAsync(categoryDto);
-        //categorieDtos = await _categorieservice.GetAllCategories();
-        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Created", Duration = 4000 });
+        _categorieservice.AddAsync(categoryDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Created", Duration = 3000 });
         CategoryDtoToInsert = null;
     }
-
-
 
     async Task SaveRow(CategoryDto CategoryDto)
     {
         await CategoryDtosGrid.UpdateRow(CategoryDto);
-        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Updated", Duration = 4000 });
-
     }
 
     void CancelEdit(CategoryDto CategoryDto)
@@ -102,20 +79,17 @@
         {
             CategoryDtoToInsert = null;
         }
-
         CategoryDtoToUpdate = null;
-
         CategoryDtosGrid.CancelEditRow(CategoryDto);
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Warning, Summary = "Canceled", Duration = 2000 });
-
     }
-
 
     //UpdateRow
     async Task EditRow(CategoryDto CategoryDto)
     {
         CategoryDtoToUpdate = CategoryDto;
         await CategoryDtosGrid.EditRow(CategoryDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Updated", Duration = 3000 });
     }
 
     async void OnUpdateRow(CategoryDto categoryDto)
@@ -124,52 +98,38 @@
         {
             CategoryDtoToInsert = null;
         }
-
         CategoryDtoToUpdate = null;
-
-        _categorieservice.UpdateCategoryAsync(categoryDto);
+        _categorieservice.UpdateAsync(categoryDto);
     }
 
-
-
-
-
     //DeleteRow
-
     async Task DeleteRow(CategoryDto categoryDto)
     {
         if (categoryDto == CategoryDtoToInsert)
         {
             CategoryDtoToInsert = null;
         }
-
         if (categoryDto == CategoryDtoToUpdate)
         {
             CategoryDtoToUpdate = null;
         }
-
         if (categorieDtos.Contains(categoryDto))
         {
-            await _categorieservice.DeleteCategoryAsync(categoryDto.Id);
-            categorieDtos = await _categorieservice.GetAllCategories();
+            await _categorieservice.DeleteAsync(categoryDto.Id);
+            categorieDtos = await _categorieservice.GetAllAsync();
             CategoryDtosGrid.Reload();
-            ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Deleted", Duration = 4000 });
-
+            ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Deleted", Duration = 3000 });
         }
         else
         {
             CategoryDtosGrid.CancelEditRow(categoryDto);
             CategoryDtosGrid.Reload();
-
         }
     }
-
 
     async void ShowNotification(NotificationMessage message)
     {
         notificationService.Notify(message);
         //Console.WriteLine($"{message.Severity} notification");
     }
-
-
 }

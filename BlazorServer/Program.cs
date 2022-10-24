@@ -14,8 +14,9 @@ builder.Services.AddSingleton<WeatherForecastService>();
 //Api
 builder.Services.AddHttpClient();
 
-builder.Services.AddScoped<IMaterialService, MaterialService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
+
+builder.Services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
+
 builder.Services.AddScoped<NotificationService>();
 
 

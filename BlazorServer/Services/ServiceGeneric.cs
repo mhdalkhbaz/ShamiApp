@@ -1,5 +1,4 @@
-﻿using BlazorServer.Pages.Categories;
-using Domain.Material;
+﻿using Domain.Material;
 using SharedProject.Dtos;
 using SharedProject.Dtos.Common;
 using System.Diagnostics;
@@ -7,33 +6,33 @@ using System.Net.Http.Json;
 
 namespace BlazorServer.Services
 {
-    public class CategoryService : ICategoryService
+    public class ServiceGeneric<TDto, T> : IServiceGeneric<TDto, T>
     {
         private readonly HttpClient _httpClient;
 
-        public CategoryService(HttpClient httpClient)
+        public ServiceGeneric(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
-        public async Task<CategoryDto> AddCategoryAsync(CategoryDto category)
+        public async Task AddAsync(TDto category)
         {
-            var categoryDto = new CategoryDto();
+            var url = String.Format("api/{0}", typeof(T).Name);
             try
             {
-               var httpResponseMessage = await _httpClient.PostAsJsonAsync<CategoryDto>("api/Category",category);
+                var httpResponseMessage = await _httpClient.PostAsJsonAsync<TDto>(url, category);
             }
             catch (Exception exception)
             {
                 var ss = exception.Message;
                 throw new Exception(exception.Message);
             }
-            return categoryDto;
         }
-        public async Task UpdateCategoryAsync(CategoryDto category)
+        public async Task UpdateAsync(TDto category)
         {
-            try
+            var url = String.Format("api/{0}", typeof(T).Name);
+            try 
             {
-                var httpResponseMessage = await _httpClient.PutAsJsonAsync<CategoryDto>("api/Category", category);
+                var httpResponseMessage = await _httpClient.PutAsJsonAsync<TDto>(url, category);
             }
             catch (Exception exception)
             {
@@ -43,12 +42,13 @@ namespace BlazorServer.Services
         }
 
 
-        public async Task<IEnumerable<CategoryDto>> GetAllCategories()
+        public async Task<IEnumerable<TDto>> GetAllAsync()
         {
-            IEnumerable<CategoryDto> categories;
+            var url = String.Format("api/{0}/get-all", typeof(T).Name);
+            IEnumerable<TDto> categories;
             try
             {
-               var categorylist  = await _httpClient.GetFromJsonAsync<PagingResultDto<CategoryDto>>("api/Category/get-all");
+                var categorylist = await _httpClient.GetFromJsonAsync<PagingResultDto<TDto>>(url);
                 categories = categorylist.Data;
             }
             catch (Exception exception)
@@ -59,13 +59,14 @@ namespace BlazorServer.Services
             return categories;
         }
 
-        public Task<CategoryDto> GetCategoryAsync(int id)
+        public Task<TDto> GetAsync(int id)
         {
             throw new NotImplementedException();
         }
-        public async Task DeleteCategoryAsync(int ssada)
+        public async Task DeleteAsync(int ssada)
         {
-           var tt =  await _httpClient.PutAsJsonAsync<int>("api/Category/delete-id" , ssada); 
+            var url = String.Format("api/{0}/delete-id", typeof(T).Name);
+            var tt = await _httpClient.PutAsJsonAsync<int>(url, ssada);
         }
     }
 }
