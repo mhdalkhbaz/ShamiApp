@@ -1,4 +1,4 @@
-﻿@page "/UnitMaterials"
+﻿@page "/unitmaterials"
 
 <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4"> UnitMaterials </RadzenText>
 
@@ -71,7 +71,6 @@
     async Task SaveRow(UnitMaterialDto UnitMaterialDto)
     {
         await UnitMaterialDtosGrid.UpdateRow(UnitMaterialDto);
-        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "UnitMaterial Updated", Duration = 3000 });
     }
 
     void CancelEdit(UnitMaterialDto UnitMaterialDto)
@@ -90,6 +89,8 @@
     {
         UnitMaterialDtoToUpdate = UnitMaterialDto;
         await UnitMaterialDtosGrid.EditRow(UnitMaterialDto);
+        ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "UnitMaterial Updated", Duration = 3000 });
+
     }
 
     async void OnUpdateRow(UnitMaterialDto UnitMaterialDto)

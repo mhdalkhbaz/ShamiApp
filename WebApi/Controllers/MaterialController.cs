@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Application.Features.MaterialFeatures.Queries;
 using Application.Common.Dtos;
+using Application.Features.CategoryFeatures.Commands;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -69,6 +70,18 @@ namespace WebApi.Controllers
         public async Task<ActionResult<PagingResultDto<MaterialDto>>> GetByIdAsync([FromQuery] int id)
         {
             return Ok(await Mediator.Send(new GetMaterialByIdQuery(id)));
+        }
+
+
+        /// <summary>
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// 
+        [HttpPut("delete-id")]
+        public async Task<ActionResult> DeleteAsync([FromBody] int id)
+        {
+            return Ok(await Mediator.Send(new DeleteMaterialCommand(id)));
         }
     }
 }

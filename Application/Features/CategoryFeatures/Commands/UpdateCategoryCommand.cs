@@ -3,14 +3,14 @@ using Application.Features.CategoryFeatures.Dtos;
 
 namespace Application.Features.CategoryFeatures.Commands
 {
-    public class DeleteCategoryCommand : IRequest
+    public class UpdateCategoryCommand : IRequest
     {
-        public DeleteCategoryCommand(int id)
+        public UpdateCategoryCommand(UpdateCategoryDto updateCategoryDto)
         {
-            Id = id;
+            UpdateCategoryDto = updateCategoryDto;
         }
 
-        public int Id { get; set; }
+        public UpdateCategoryDto UpdateCategoryDto { get; set; }
 
     }
 }
