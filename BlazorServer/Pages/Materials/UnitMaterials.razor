@@ -1,8 +1,13 @@
 ﻿@page "/unitmaterials"
 
+@using AutoMapper
+
+@inject IMapper _mapper;
+
+
 <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4"> UnitMaterials </RadzenText>
 
-<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Class="mt-2 mb-4" Text="Add New UnitMaterial" Click="@InsertRow" Disabled=@(UnitMaterialDtoToInsert != null || UnitMaterialDtoToUpdate != null) />
+<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Class="mt-2 mb-4" Text="Add New UnitMaterial" Click="@InsertRow" Disabled=@(unitMaterialDtoToInsert != null || UnitMaterialDtoToUpdate != null) />
 
 <RadzenDataGrid @ref="UnitMaterialDtosGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true" EditMode="DataGridEditMode.Single"
                 Data="@UnitMaterialDtos" TItem="UnitMaterialDto" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow">
@@ -42,11 +47,11 @@
 {
 //--------------------------------------------------------------------------------------------------------------------------------------
     [Inject]
-    public IServiceGeneric<UnitMaterialDto, UnitMaterial, CreateUnitMaterialDto> _UnitMaterialservice { get; set; }
+    public IServiceGeneric<UnitMaterialDto, UnitMaterial, CreateUnitMaterialDto, UpdateUnitMaterialDto> _UnitMaterialservice { get; set; }
 
     RadzenDataGrid<UnitMaterialDto> UnitMaterialDtosGrid;
     IEnumerable<UnitMaterialDto> UnitMaterialDtos;
-    UnitMaterialDto UnitMaterialDtoToInsert;
+    UnitMaterialDto unitMaterialDtoToInsert;
     UnitMaterialDto UnitMaterialDtoToUpdate;
 
     protected override async Task OnInitializedAsync()
@@ -57,16 +62,15 @@
 
     async Task InsertRow()
     {
-        UnitMaterialDtoToInsert = new UnitMaterialDto();
-        await UnitMaterialDtosGrid.InsertRow(UnitMaterialDtoToInsert);
+        unitMaterialDtoToInsert = new UnitMaterialDto();
+        await UnitMaterialDtosGrid.InsertRow(unitMaterialDtoToInsert);
     }
-    async Task OnCreateRow(UnitMaterialDto UnitMaterialDto)
+    async Task OnCreateRow(UnitMaterialDto dto)
     {
-        UnitMaterialDto.Id = 0;
-        
-        _UnitMaterialservice.AddAsync(new CreateUnitMaterialDto() );
+        dto.Id = 0;
+        _UnitMaterialservice.AddAsync(_mapper.Map<CreateUnitMaterialDto>(dto));
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "UnitMaterial Created", Duration = 3000 });
-        UnitMaterialDtoToInsert = null;
+        unitMaterialDtoToInsert = null;
     }
 
     async Task SaveRow(UnitMaterialDto UnitMaterialDto)
@@ -76,9 +80,9 @@
 
     void CancelEdit(UnitMaterialDto UnitMaterialDto)
     {
-        if (UnitMaterialDto == UnitMaterialDtoToInsert)
+        if (UnitMaterialDto == unitMaterialDtoToInsert)
         {
-            UnitMaterialDtoToInsert = null;
+            unitMaterialDtoToInsert = null;
         }
         UnitMaterialDtoToUpdate = null;
         UnitMaterialDtosGrid.CancelEditRow(UnitMaterialDto);
@@ -94,22 +98,22 @@
 
     }
 
-    async void OnUpdateRow(UnitMaterialDto UnitMaterialDto)
+    async void OnUpdateRow(UnitMaterialDto unitMaterialDto)
     {
-        if (UnitMaterialDto == UnitMaterialDtoToInsert)
+        if (unitMaterialDto == unitMaterialDtoToInsert)
         {
-            UnitMaterialDtoToInsert = null;
+            unitMaterialDtoToInsert = null;
         }
         UnitMaterialDtoToUpdate = null;
-        _UnitMaterialservice.UpdateAsync(UnitMaterialDto);
+        _UnitMaterialservice.UpdateAsync(_mapper.Map<UpdateUnitMaterialDto>(unitMaterialDto));
     }
 
     //DeleteRow
     async Task DeleteRow(UnitMaterialDto UnitMaterialDto)
     {
-        if (UnitMaterialDto == UnitMaterialDtoToInsert)
+        if (UnitMaterialDto == unitMaterialDtoToInsert)
         {
-            UnitMaterialDtoToInsert = null;
+            unitMaterialDtoToInsert = null;
         }
         if (UnitMaterialDto == UnitMaterialDtoToUpdate)
         {

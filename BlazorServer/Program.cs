@@ -16,13 +16,15 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddHttpClient();
 
 
-builder.Services.AddScoped(typeof(IServiceGeneric<,,>), typeof(ServiceGeneric<,,>));
+builder.Services.AddScoped(typeof(IServiceGeneric<,,,>), typeof(ServiceGeneric<,,,>));
 
 builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:44323") });
+
+builder.Services.AddScoped<SpinnerService>();
 
 var app = builder.Build();
 

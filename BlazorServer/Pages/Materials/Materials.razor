@@ -2,6 +2,9 @@
 @using AutoMapper
 
 @inject IMapper _mapper;
+@inject SpinnerService _spinnerService;
+@using BlazorServer.Componenets
+
 
 <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4"> Categories </RadzenText>
 
@@ -22,19 +25,16 @@
 
            
         <RadzenDataGridColumn TItem="MaterialDto" Property="Category.Name" Title="Category Name" Width="280px">
-
-
             <EditTemplate Context="materialDto">
-            
                 <RadzenDropDown @bind-Value="materialDto.Category.Id" Data="@categories" TextProperty="Name" ValueProperty="Id" Style="width:100%; display: block;" />
-          
             </EditTemplate>
-
         </RadzenDataGridColumn>
-   
-   
 
-
+        <RadzenDataGridColumn TItem="MaterialDto" Property="UnitMaterial.Name" Title="Unit Name" Width="280px">
+            <EditTemplate Context="materialDto">
+                <RadzenDropDown @bind-Value="materialDto.UnitMaterial.Id" Data="@unitMaterials" TextProperty="Name" ValueProperty="Id" Style="width:100%; display: block;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
 
         <RadzenDataGridColumn TItem="MaterialDto" Context="materialDtos" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
             <Template Context="materialDto">
@@ -56,17 +56,19 @@
     </Columns>
 </RadzenDataGrid>
 
+<SpinnerComponenet />
+  
 @code
 {
     //--------------------------------------------------------------------------------------------------------------------------------------
     [Inject]
-    public IServiceGeneric<MaterialDto, Material, CreateMaterialDto> _materialsservice { get; set; }
+    public IServiceGeneric<MaterialDto, Material, CreateMaterialDto, UpdateMaterialDto> _materialsservice { get; set; }
 
     [Inject]
-    public IServiceGeneric<CategoryDto, Category, CreateCategoryDto> _categoreiesservice { get; set; }
+    public IServiceGeneric<CategoryDto, Category, CreateCategoryDto, UpdateCategoryDto> _categoreiesservice { get; set; }
 
     [Inject]
-    public IServiceGeneric<UnitMaterialDto, UnitMaterial, CreateUnitMaterialDto> _unitMaterialsservice { get; set; }
+    public IServiceGeneric<UnitMaterialDto, UnitMaterial, CreateUnitMaterialDto, UpdateUnitMaterialDto> _unitMaterialsservice { get; set; }
 
 
     RadzenDataGrid<MaterialDto> MaterialDtosGrid;
@@ -80,11 +82,20 @@
 
     protected override async Task OnInitializedAsync()
     {
+        
+        _spinnerService.Show();
+        await Task.Delay(4000);
+        
+
         categories = await _categoreiesservice.GetAllAsync();
         unitMaterials = await _unitMaterialsservice.GetAllAsync();
 
         materialDtos = await _materialsservice.GetAllAsync();
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success Load", Duration = 3000 });
+        //_spinnerService.Show();
+        //await Task.Delay(4000);
+        //_spinnerService.Hide();
+
     }
 
     async Task InsertRow()
@@ -101,12 +112,12 @@
         await _materialsservice.AddAsync(createMaterialDto);
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Material Created", Duration = 3000 });
         MaterialDtoToInsert = null;
-        materialDtos = await _materialsservice.GetAllAsync();
     }
 
     async Task SaveRow(MaterialDto MaterialDto)
     {
         await MaterialDtosGrid.UpdateRow(MaterialDto);
+        materialDtos = await _materialsservice.GetAllAsync();
 
     }
 
@@ -129,14 +140,14 @@
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Material Updated", Duration = 3000 });
     }
 
-    async void OnUpdateRow(MaterialDto categoryDto)
+    async void OnUpdateRow(MaterialDto dto)
     {
-        if (categoryDto == MaterialDtoToInsert)
+        if (dto == MaterialDtoToInsert)
         {
             MaterialDtoToInsert = null;
         }
         MaterialDtoToUpdate = null;
-        _materialsservice.UpdateAsync(categoryDto);
+        _materialsservice.UpdateAsync(_mapper.Map<UpdateMaterialDto>(dto));
     }
 
     //DeleteRow

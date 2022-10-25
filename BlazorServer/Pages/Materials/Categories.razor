@@ -1,5 +1,11 @@
 ﻿@page "/categories"
 
+@using AutoMapper
+
+@inject IMapper _mapper;
+
+
+
 <RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4"> Categories </RadzenText>
 
 <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Class="mt-2 mb-4" Text="Add New Category" Click="@InsertRow" Disabled=@(CategoryDtoToInsert != null || CategoryDtoToUpdate != null) />
@@ -42,7 +48,7 @@
 {
 //--------------------------------------------------------------------------------------------------------------------------------------
     [Inject]
-    public IServiceGeneric<CategoryDto, Category, CreateCategoryDto> _categorieservice { get; set; }
+    public IServiceGeneric<CategoryDto, Category, CreateCategoryDto, UpdateCategoryDto> _categorieservice { get; set; }
 
     RadzenDataGrid<CategoryDto> CategoryDtosGrid;
     IEnumerable<CategoryDto> categorieDtos;
@@ -60,10 +66,10 @@
         CategoryDtoToInsert = new CategoryDto();
         await CategoryDtosGrid.InsertRow(CategoryDtoToInsert);
     }
-    async Task OnCreateRow(CategoryDto categoryDto)
+    async Task OnCreateRow(CategoryDto dto)
     {
-        categoryDto.Id = 0;
-        _categorieservice.AddAsync(new CreateCategoryDto() );
+        dto.Id = 0;
+        _categorieservice.AddAsync(_mapper.Map<CreateCategoryDto>(dto));
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Created", Duration = 3000 });
         CategoryDtoToInsert = null;
     }
@@ -92,14 +98,14 @@
         ShowNotification(new NotificationMessage() { Severity = NotificationSeverity.Success, Summary = "Success", Detail = "Category Updated", Duration = 3000 });
     }
 
-    async void OnUpdateRow(CategoryDto categoryDto)
+    async void OnUpdateRow(CategoryDto dto)
     {
-        if (categoryDto == CategoryDtoToInsert)
+        if (dto == CategoryDtoToInsert)
         {
             CategoryDtoToInsert = null;
         }
         CategoryDtoToUpdate = null;
-        _categorieservice.UpdateAsync(categoryDto);
+        _categorieservice.UpdateAsync(_mapper.Map<UpdateCategoryDto>(dto));
     }
 
     //DeleteRow
